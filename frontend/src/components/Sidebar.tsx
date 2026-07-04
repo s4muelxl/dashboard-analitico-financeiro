@@ -3,13 +3,9 @@ import { useAuth } from '../context/AuthContext';
 import { 
   LayoutDashboard, 
   ArrowLeftRight, 
-  CreditCard, 
   ShieldAlert, 
   LogOut, 
-  TrendingUp, 
-  TrendingDown,
   User as UserIcon,
-  Menu,
   X,
   CalendarRange
 } from 'lucide-react';
@@ -28,7 +24,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, isOpe
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'transactions', label: 'Transações', icon: ArrowLeftRight },
     { id: 'tasks', label: 'Rotina Semanal', icon: CalendarRange },
-    { id: 'saas', label: 'Assinatura SaaS', icon: CreditCard },
   ];
 
   // Only show Admin Panel if user is Administrator

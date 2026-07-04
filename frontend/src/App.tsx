@@ -7,7 +7,7 @@ import { Login } from './pages/Login';
 import { Register } from './pages/Register';
 import { Dashboard } from './pages/Dashboard';
 import { Transactions } from './pages/Transactions';
-import { SaaSPricing } from './pages/SaaSPricing';
+
 import { Admin } from './pages/Admin';
 import { Tasks } from './pages/Tasks';
 
@@ -67,7 +67,7 @@ const AppContent: React.FC = () => {
               {activeTab === 'dashboard' && <Dashboard />}
               {activeTab === 'transactions' && <Transactions />}
               {activeTab === 'tasks' && <Tasks />}
-              {activeTab === 'saas' && <SaaSPricing />}
+
               {activeTab === 'admin' && user?.cargo === 'admin' && <Admin />}
               
             </div>
