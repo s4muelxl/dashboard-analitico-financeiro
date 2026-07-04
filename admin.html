@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel - Strong Finance</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Outfit', 'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
+    .admin-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+      margin-top: 1.5rem;
+    }
+    .admin-table-container {
+      background: var(--bg-card);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      overflow-x: auto;
+      margin-bottom: 1.5rem;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+      text-align: left;
+    }
+    th, td {
+      padding: 0.9rem 1.2rem;
+      border-bottom: 1px solid var(--border);
+    }
+    th {
+      background: rgba(0,0,0,0.1);
+      color: var(--text-muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      letter-spacing: 0.05em;
+    }
+    tr:last-child td {
+      border-bottom: none;
+    }
+    .status-badge {
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    .status-badge.ativo { background: rgba(16, 185, 129, 0.1); color: var(--success); }
+    .status-badge.bloqueado { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
+    .role-badge {
+      display: inline-block;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      background: rgba(255,255,255,0.06);
+    }
+    .role-badge.admin { color: var(--primary); }
+    
+    .admin-tabs {
+      display: flex;
+      gap: 0.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .admin-tab {
+      background: none;
+      border: 1px solid var(--border);
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.85rem;
+      transition: var(--transition);
+    }
+    .admin-tab:hover { color: var(--text); border-color: var(--text-muted); }
+    .admin-tab.active { background: var(--primary); color: #0b1120; border-color: var(--primary); }
+    
+    .log-timestamp { color: var(--text-muted); font-size: 0.8rem; font-family: monospace; }
+  </style>
+</head>
+<body class="app-layout">
+  <!-- SIDEBAR DE NAVEGAÇÃO -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-logo">SF</div>
+      <h2>Strong Finance</h2>
+    </div>
+    
+    <nav class="sidebar-menu">
+      <a href="index.html" class="menu-item" style="text-decoration: none;">
+        <span class="menu-icon">📊</span> Painel Principal
+      </a>
+      <button class="menu-item active" data-target="admin-dashboard">
+        <span class="menu-icon">⚙️</span> Painel Admin
+      </button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-profile">
+        <span class="user-avatar">👤</span>
+        <div class="user-details">
+          <span class="user-name-label" id="admin-user-name">Administrador</span>
+          <span class="user-role-label">Administrador</span>
+        </div>
+      </div>
+      <button id="btn-admin-logout" class="btn btn-outline btn-block">Sair</button>
+    </div>
+  </aside>
+
+  <!-- CONTEÚDO PRINCIPAL -->
+  <div class="main-layout">
+    <header class="main-header">
+      <h1>Painel de Controle Administrativo</h1>
+      <div class="header-actions">
+        <button id="btn-admin-create-user" class="btn btn-primary">+ Novo Usuário</button>
+      </div>
+    </header>
+
+    <main class="content-section active">
+      <!-- Estatísticas Admin -->
+      <section class="summary-cards">
+        <div class="card">
+          <h3>Total de Usuários</h3>
+          <p id="stat-total-users" class="amount">0</p>
+        </div>
+        <div class="card">
+          <h3>Usuários Online</h3>
+          <p id="stat-online-users" class="amount" style="color: var(--success);">0</p>
+        </div>
+        <div class="card">
+          <h3>Novos Cadastros (30 dias)</h3>
+          <p id="stat-new-registers" class="amount" style="color: #6366f1;">0</p>
+        </div>
+        <div class="card">
+          <h3>Total Transacionado</h3>
+          <p id="stat-total-volume" class="amount" style="color: var(--primary);">R$ 0,00</p>
+        </div>
+      </section>
+
+      <!-- Abas Administrativas -->
+      <div class="admin-tabs">
+        <button class="admin-tab active" data-view="view-users">Gestão de Usuários</button>
+        <button class="admin-tab" data-view="view-logs">Auditoria de Logs</button>
+        <button class="admin-tab" data-view="view-access">Últimos Acessos</button>
+      </div>
+
+      <!-- VISÃO: GESTÃO DE USUÁRIOS -->
+      <div class="admin-view" id="view-users">
+        <div class="admin-table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th>E-mail</th>
+                <th>Cargo</th>
+                <th>Status</th>
+                <th>Último Acesso</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="users-table-body">
+              <!-- Preenchido via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- VISÃO: AUDITORIA DE LOGS -->
+      <div class="admin-view" id="view-logs" style="display: none;">
+        <div class="admin-table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Data/Hora</th>
+                <th>Ação</th>
+                <th>Operador</th>
+                <th>Usuário Alvo</th>
+                <th>Detalhes</th>
+              </tr>
+            </thead>
+            <tbody id="logs-table-body">
+              <!-- Preenchido via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- VISÃO: ÚLTIMOS ACESSOS -->
+      <div class="admin-view" id="view-access" style="display: none;">
+        <div class="admin-table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Data/Hora Login</th>
+                <th>Nome</th>
+                <th>E-mail</th>
+                <th>IP</th>
+                <th>Dispositivo/UA</th>
+              </tr>
+            </thead>
+            <tbody id="access-table-body">
+              <!-- Preenchido via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- MODAL: CRIAR / EDITAR USUÁRIO -->
+  <div class="modal" id="modal-admin-user">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="modal-user-title">Criar Novo Usuário</h2>
+        <button class="modal-close" id="btn-close-user-modal">&times;</button>
+      </div>
+      <form id="form-admin-user">
+        <div class="form-group">
+          <label for="usr-nome">Nome Completo</label>
+          <input type="text" id="usr-nome" required placeholder="Ex: João Silva">
+        </div>
+        <div class="form-group">
+          <label for="usr-email">E-mail corporativo</label>
+          <input type="email" id="usr-email" required placeholder="joao@strongfinance.com">
+        </div>
+        <div class="form-group" id="usr-pw-group">
+          <label for="usr-password">Senha Provisória</label>
+          <input type="password" id="usr-password" required placeholder="Mínimo 6 caracteres" minlength="6">
+        </div>
+        <div class="form-group">
+          <label for="usr-cargo">Nível de Acesso (Cargo)</label>
+          <select id="usr-cargo" required>
+            <option value="comum" selected>Usuário Comum</option>
+            <option value="admin">Administrador</option>
+          </select>
+        </div>
+        <div class="form-group" id="usr-status-group" style="display: none;">
+          <label for="usr-status">Status da Conta</label>
+          <select id="usr-status">
+            <option value="ativo">Ativo</option>
+            <option value="bloqueado">Bloqueado (Suspenso)</option>
+          </select>
+        </div>
+        <input type="hidden" id="usr-id">
+        <button type="submit" class="btn btn-primary btn-block">Salvar Cadastro</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: HISTÓRICO DE ACESSOS ESPECÍFICO -->
+  <div class="modal" id="modal-user-access-log">
+    <div class="modal-content" style="max-width: 600px;">
+      <div class="modal-header">
+        <h2>Logs de Acesso do Usuário</h2>
+        <button class="modal-close" id="btn-close-access-modal">&times;</button>
+      </div>
+      <div style="padding: 1.5rem; max-height: 400px; overflow-y: auto;">
+        <table style="width: 100%;">
+          <thead>
+            <tr>
+              <th>Data/Hora Entrada</th>
+              <th>IP</th>
+              <th>Data/Hora Saída (Logout)</th>
+            </tr>
+          </thead>
+          <tbody id="user-access-list">
+            <!-- Preenchido via JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/auth.js"></script>
+  <script src="js/api.js"></script>
+  <script>
+    // Script específico para rodar a página Admin
+    const AdminApp = {
+      stats: {},
+      users: [],
+      logs: [],
+
+      async init() {
+        if (!AuthService.requireAuth()) return;
+        
+        // Validar se é realmente administrador
+        const session = AuthService.getUser();
+        if (!session || session.cargo !== 'admin') {
+          alert('Acesso negado. Área restrita.');
+          window.location.href = 'index.html';
+          return;
+        }
+
+        document.getElementById('admin-user-name').textContent = session.name || session.nome || 'Administrador';
+
+        this.cacheDOM();
+        this.bindEvents();
+        await this.loadStats();
+        await this.loadUsers();
+      },
+
+      cacheDOM() {
+        this.el = {
+          statTotalUsers: document.getElementById('stat-total-users'),
+          statOnlineUsers: document.getElementById('stat-online-users'),
+          statNewRegisters: document.getElementById('stat-new-registers'),
+          statTotalVolume: document.getElementById('stat-total-volume'),
+          usersTableBody: document.getElementById('users-table-body'),
+          logsTableBody: document.getElementById('logs-table-body'),
+          accessTableBody: document.getElementById('access-table-body'),
+          tabButtons: document.querySelectorAll('.admin-tab'),
+          views: document.querySelectorAll('.admin-view'),
+          btnCreateUser: document.getElementById('btn-admin-create-user'),
+          modalUser: document.getElementById('modal-admin-user'),
+          modalUserTitle: document.getElementById('modal-user-title'),
+          formUser: document.getElementById('form-admin-user'),
+          btnCloseUserModal: document.getElementById('btn-close-user-modal'),
+          btnLogout: document.getElementById('btn-admin-logout'),
+          
+          // Campos User Form
+          usrId: document.getElementById('usr-id'),
+          usrNome: document.getElementById('usr-nome'),
+          usrEmail: document.getElementById('usr-email'),
+          usrPassword: document.getElementById('usr-password'),
+          usrCargo: document.getElementById('usr-cargo'),
+          usrStatus: document.getElementById('usr-status'),
+          usrPwGroup: document.getElementById('usr-pw-group'),
+          usrStatusGroup: document.getElementById('usr-status-group'),
+          
+          // Modal de Acesso Específico
+          modalAccess: document.getElementById('modal-user-access-log'),
+          btnCloseAccessModal: document.getElementById('btn-close-access-modal'),
+          userAccessList: document.getElementById('user-access-list')
+        };
+      },
+
+      bindEvents() {
+        // Alternar Visualizações
+        this.el.tabButtons.forEach(btn => {
+          btn.addEventListener('click', async () => {
+            this.el.tabButtons.forEach(t => t.classList.remove('active'));
+            btn.classList.add('active');
+            
+            const targetView = btn.dataset.view;
+            this.el.views.forEach(v => v.style.display = 'none');
+            document.getElementById(targetView).style.display = 'block';
+
+            if (targetView === 'view-logs') {
+              await this.loadLogs();
+            } else if (targetView === 'view-users') {
+              await this.loadUsers();
+            } else if (targetView === 'view-access') {
+              await this.loadStats(); // Recarrega estatísticas (contém últimos acessos)
+            }
+          });
+        });
+
+        // Logout
+        this.el.btnLogout.addEventListener('click', () => {
+          if (confirm('Deseja sair da administração?')) {
+            AuthService.logout();
+          }
+        });
+
+        // Formulário Usuário
+        this.el.btnCreateUser.addEventListener('click', () => this.openUserModal());
+        this.el.btnCloseUserModal.addEventListener('click', () => this.closeUserModal());
+        this.el.formUser.addEventListener('submit', (e) => this.handleUserSubmit(e));
+
+        // Fechar modal de acesso
+        this.el.btnCloseAccessModal.addEventListener('click', () => {
+          this.el.modalAccess.classList.remove('active');
+        });
+
+        // Fechar modais ao teclar ESC
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape') {
+            this.closeUserModal();
+            this.el.modalAccess.classList.remove('active');
+          }
+        });
+      },
+
+      async loadStats() {
+        const data = await DataService.getAdminStats();
+        if (data) {
+          this.el.statTotalUsers.textContent = data.totalUsers;
+          this.el.statOnlineUsers.textContent = data.onlineUsers;
+          this.el.statNewRegisters.textContent = data.newRegisters;
+          this.el.statTotalVolume.textContent = this.formatCurrency(data.totalVolume);
+          
+          // Preencher Tabela de Últimos Acessos Gerais
+          this.el.accessTableBody.innerHTML = data.lastAccesses.map(a => `
+            <tr>
+              <td class="log-timestamp">${new Date(a.login_time).toLocaleString('pt-BR')}</td>
+              <td><strong>${a.nome}</strong></td>
+              <td>${a.email}</td>
+              <td><code>${a.ip_address || 'local'}</code></td>
+              <td style="font-size: 0.8rem; color: var(--text-muted); max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${a.user_agent || 'N/A'}</td>
+            </tr>
+          `).join('');
+        }
+      },
+
+      async loadUsers() {
+        this.users = await DataService.getAdminUsers();
+        
+        this.el.usersTableBody.innerHTML = this.users.map(u => {
+          const ultimoAcessoStr = u.ultimo_acesso ? new Date(u.ultimo_acesso).toLocaleString('pt-BR') : 'Sem acessos';
+          
+          return `
+            <tr>
+              <td><strong>${u.nome}</strong></td>
+              <td>${u.email}</td>
+              <td><span class="role-badge ${u.cargo}">${u.cargo === 'admin' ? 'Administrador' : 'Comum'}</span></td>
+              <td><span class="status-badge ${u.status}">${u.status}</span></td>
+              <td>${ultimoAcessoStr}</td>
+              <td>
+                <div style="display: flex; gap: 0.3rem;">
+                  <button class="btn btn-outline" style="padding: 0.3rem 0.6rem; font-size: 0.75rem;" onclick="AdminApp.editUser(${u.id})">Editar</button>
+                  <button class="btn btn-outline" style="padding: 0.3rem 0.6rem; font-size: 0.75rem; border-color: var(--warning); color: var(--warning);" onclick="AdminApp.toggleUserBlock(${u.id})">
+                    ${u.status === 'ativo' ? 'Bloquear' : 'Desbloquear'}
+                  </button>
+                  <button class="btn btn-outline" style="padding: 0.3rem 0.6rem; font-size: 0.75rem;" onclick="AdminApp.resetPassword(${u.id}, '${u.email}')">Senha</button>
+                  <button class="btn btn-outline" style="padding: 0.3rem 0.6rem; font-size: 0.75rem;" onclick="AdminApp.viewUserAccess(${u.id})">Acessos</button>
+                  <button class="btn btn-outline" style="padding: 0.3rem 0.6rem; font-size: 0.75rem; border-color: var(--danger); color: var(--danger);" onclick="AdminApp.deleteUser(${u.id})">Excluir</button>
+                </div>
+              </td>
+            </tr>
+          `;
+        }).join('');
+      },
+
+      async loadLogs() {
+        const logs = await DataService.getAdminLogs();
+        this.el.logsTableBody.innerHTML = logs.map(l => {
+          const operador = l.operador_email ? `<strong>${l.operador_nome}</strong> (${l.operador_email})` : 'Sistema';
+          const target = l.usuario_email ? `${l.usuario_nome} (${l.usuario_email})` : '-';
+          
+          let acaoColor = 'var(--text)';
+          if (l.acao === 'tentativa_falha' || l.acao === 'bloqueio') acaoColor = 'var(--danger)';
+          else if (l.acao === 'cadastro') acaoColor = 'var(--success)';
+          
+          return `
+            <tr>
+              <td class="log-timestamp">${new Date(l.timestamp).toLocaleString('pt-BR')}</td>
+              <td><span style="font-weight:700; color: ${acaoColor}; text-transform: uppercase; font-size: 0.78rem;">${l.acao}</span></td>
+              <td style="font-size:0.85rem;">${operador}</td>
+              <td style="font-size:0.85rem;">${target}</td>
+              <td style="font-size:0.85rem; max-width: 350px; word-break: break-all;">${l.detalhes}</td>
+            </tr>
+          `;
+        }).join('');
+      },
+
+      openUserModal(user = null) {
+        this.el.modalUser.classList.add('active');
+        this.el.formUser.reset();
+        this.el.usrId.value = '';
+        this.el.usrPwGroup.style.display = 'flex';
+        this.el.usrPassword.required = true;
+        this.el.usrStatusGroup.style.display = 'none';
+
+        if (user) {
+          this.el.modalUserTitle.textContent = 'Editar Usuário';
+          this.el.usrId.value = user.id;
+          this.el.usrNome.value = user.nome;
+          this.el.usrEmail.value = user.email;
+          this.el.usrCargo.value = user.cargo;
+          this.el.usrStatus.value = user.status;
+          this.el.usrPwGroup.style.display = 'none'; // Não altera senha por aqui
+          this.el.usrPassword.required = false;
+          this.el.usrStatusGroup.style.display = 'flex';
+        } else {
+          this.el.modalUserTitle.textContent = 'Criar Novo Usuário';
+        }
+        this.el.usrNome.focus();
+      },
+
+      closeUserModal() {
+        this.el.modalUser.classList.remove('active');
+      },
+
+      async handleUserSubmit(e) {
+        e.preventDefault();
+        const id = this.el.usrId.value;
+        const nome = this.el.usrNome.value.trim();
+        const email = this.el.usrEmail.value.trim();
+        const cargo = this.el.usrCargo.value;
+
+        let result;
+        if (id) {
+          const status = this.el.usrStatus.value;
+          result = await DataService.updateAdminUser(id, { nome, email, cargo, status });
+        } else {
+          const password = this.el.usrPassword.value;
+          result = await DataService.createAdminUser({ nome, email, password, cargo });
+        }
+
+        if (result) {
+          this.closeUserModal();
+          await this.loadUsers();
+          await this.loadStats();
+        }
+      },
+
+      editUser(id) {
+        const u = this.users.find(usr => usr.id == id);
+        if (u) this.openUserModal(u);
+      },
+
+      async toggleUserBlock(id) {
+        const result = await DataService.toggleBlockAdminUser(id);
+        if (result) {
+          await this.loadUsers();
+          await this.loadStats();
+        }
+      },
+
+      async resetPassword(id, email) {
+        const newPw = prompt(`Digite a nova senha para o usuário ${email}:`);
+        if (newPw === null) return;
+        if (newPw.trim().length < 6) {
+          alert('A nova senha precisa ter no mínimo 6 caracteres.');
+          return;
+        }
+
+        const result = await DataService.resetAdminUserPassword(id, newPw.trim());
+        if (result) {
+          alert('Senha atualizada com sucesso!');
+        }
+      },
+
+      async viewUserAccess(id) {
+        const list = await DataService.getAdminUserAccessHistory(id);
+        this.el.userAccessList.innerHTML = list.length === 0 
+          ? '<tr><td colspan="3" style="text-align:center;">Nenhum registro encontrado.</td></tr>'
+          : list.map(a => `
+            <tr>
+              <td class="log-timestamp">${new Date(a.login_time).toLocaleString('pt-BR')}</td>
+              <td><code>${a.ip_address || 'local'}</code></td>
+              <td class="log-timestamp">${a.logout_time ? new Date(a.logout_time).toLocaleString('pt-BR') : 'Sessão encerrada/Expirada'}</td>
+            </tr>
+          `).join('');
+
+        this.el.modalAccess.classList.add('active');
+      },
+
+      async deleteUser(id) {
+        if (confirm('Deseja REALMENTE excluir este usuário? Esta ação apagará todas as transações, metas e rotinas vinculadas e não poderá ser desfeita!')) {
+          const result = await DataService.deleteAdminUser(id);
+          if (result) {
+            await this.loadUsers();
+            await this.loadStats();
+          }
+        }
+      },
+
+      formatCurrency(value) {
+        return `R$ ${(value || 0).toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.')}`;
+      }
+    };
+
+    document.addEventListener('DOMContentLoaded', () => AdminApp.init());
+  </script>
+</body>
+</html>

@@ -3,15 +3,21 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login - Dashboard Financeiro</title>
+  <title>Login - Strong Finance Dashboard</title>
   <link rel="stylesheet" href="css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Outfit', 'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
+  </style>
 </head>
 <body class="login-page">
   <div class="login-container">
     <div class="login-card">
       <div class="login-header">
-        <h1>Dashboard Financeiro</h1>
-        <p>Gerencie suas finanças pessoais</p>
+        <h1>Strong Finance</h1>
+        <p>Gerencie suas finanças e produtividade diária</p>
       </div>
 
       <div class="login-tabs">
@@ -25,7 +31,10 @@
           <input type="email" id="login-email" required placeholder="seu@email.com">
         </div>
         <div class="form-group">
-          <label for="login-password">Senha</label>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <label for="login-password">Senha</label>
+            <a href="#" onclick="showRecoverForm(); return false;" style="color: var(--primary); font-size: 0.8rem; text-decoration: none; transition: color 0.2s;">Esqueceu a senha?</a>
+          </div>
           <input type="password" id="login-password" required placeholder="Sua senha">
         </div>
         <p class="form-error" id="login-error"></p>
@@ -51,6 +60,39 @@
         </div>
         <p class="form-error" id="register-error"></p>
         <button type="submit" class="btn btn-primary btn-block">Criar Conta</button>
+      </form>
+
+      <form id="form-recover" class="login-form">
+        <div id="recover-step-1">
+          <div class="form-group">
+            <label for="recover-email">E-mail Cadastrado</label>
+            <input type="email" id="recover-email" required placeholder="seu@email.com">
+          </div>
+          <p class="form-error" id="recover-error"></p>
+          <p class="form-success" id="recover-success" style="color: var(--success); font-size: 0.85rem; text-align: center; margin-bottom: 1rem;"></p>
+          <button type="submit" class="btn btn-primary btn-block">Solicitar Código</button>
+        </div>
+        
+        <div id="recover-step-2" style="display: none;">
+          <div class="form-group">
+            <label for="reset-token">Código de Recuperação</label>
+            <input type="text" id="reset-token" required placeholder="Cole o código recebido">
+          </div>
+          <div class="form-group">
+            <label for="reset-password">Nova Senha</label>
+            <input type="password" id="reset-password" required minlength="6" placeholder="Mínimo 6 caracteres">
+          </div>
+          <div class="form-group">
+            <label for="reset-confirm">Confirmar Nova Senha</label>
+            <input type="password" id="reset-confirm" required placeholder="Confirme a nova senha">
+          </div>
+          <p class="form-error" id="reset-error" style="color: var(--danger); font-size: 0.85rem; text-align: center; margin-top: 0.5rem;"></p>
+          <button type="button" id="form-reset-pw" class="btn btn-primary btn-block">Redefinir Senha</button>
+        </div>
+
+        <p style="text-align: center; margin-top: 1.2rem; font-size: 0.9rem;">
+          <a href="#" onclick="showLoginForm(); return false;" style="color: var(--text-muted); text-decoration: none; transition: color 0.2s;">Voltar para o Login</a>
+        </p>
       </form>
     </div>
   </div>
