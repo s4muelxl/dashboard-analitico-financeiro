@@ -1,15 +1,16 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Mail, Lock, ShieldCheck, DatabaseZap, ArrowRight } from 'lucide-react';
+import { Mail, Lock, ArrowRight, Eye, EyeOff } from 'lucide-react';
 
 interface LoginProps {
   onNavigateRegister: () => void;
 }
 
 export const Login: React.FC<LoginProps> = ({ onNavigateRegister }) => {
-  const { login, mockMode, toggleMockMode } = useAuth();
-  const [email, setEmail] = useState('lucas@exemplo.com'); // Autofill default mock account
-  const [password, setPassword] = useState('123456');
+  const { login } = useAuth();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -27,11 +28,6 @@ export const Login: React.FC<LoginProps> = ({ onNavigateRegister }) => {
     }
   };
 
-  const handleQuickLogin = (selectedEmail: string) => {
-    setEmail(selectedEmail);
-    setPassword('123456');
-  };
-
   return (
     <div className="min-h-screen w-full flex items-center justify-center bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-900/30 via-slate-950 to-slate-950 px-4 py-12 relative overflow-hidden">
       
@@ -47,22 +43,15 @@ export const Login: React.FC<LoginProps> = ({ onNavigateRegister }) => {
             ⚡
           </div>
           <h2 className="text-3xl font-extrabold tracking-tight text-white font-sans">Strong Finance</h2>
-          <p className="text-slate-400 text-sm mt-1.5 font-medium">Seu SaaS de inteligência financeira & hábitos</p>
+          <p className="text-slate-400 text-sm mt-1.5 font-medium">Seu painel de inteligência financeira & hábitos</p>
         </div>
 
         {/* Card */}
         <div className="glass-panel p-8 rounded-3xl shadow-2xl border border-white/10 relative">
           
-          <div className="mb-6 flex justify-between items-center">
+          <div className="mb-6">
             <h3 className="text-lg font-bold text-white">Fazer Login</h3>
-            <button
-              onClick={() => toggleMockMode(!mockMode)}
-              className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-              title="Alternar entre modo teste local e conexão real com o banco"
-            >
-              <DatabaseZap className="h-3.5 w-3.5" />
-              {mockMode ? 'Modo Teste Ativo' : 'Banco Real'}
-            </button>
+            <p className="text-slate-500 text-xs mt-1">Acesse sua conta para continuar.</p>
           </div>
 
           {error && (
@@ -89,19 +78,27 @@ export const Login: React.FC<LoginProps> = ({ onNavigateRegister }) => {
               </div>
             </div>
 
-            {/* Password Field */}
+            {/* Password Field with toggle */}
             <div>
               <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1.5">Senha de Acesso</label>
               <div className="relative">
                 <Lock className="absolute left-3.5 top-3.5 h-4.5 w-4.5 text-slate-500" />
                 <input
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-800 bg-slate-900/40 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none text-white placeholder-slate-600"
+                  className="w-full pl-11 pr-11 py-3 rounded-xl border border-slate-800 bg-slate-900/40 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none text-white placeholder-slate-600"
                   placeholder="••••••••"
                   required
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3.5 top-3.5 text-slate-500 hover:text-slate-300 transition-colors"
+                  tabIndex={-1}
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
               </div>
             </div>
 
@@ -119,29 +116,6 @@ export const Login: React.FC<LoginProps> = ({ onNavigateRegister }) => {
               )}
             </button>
           </form>
-
-          {/* Quick Mock Login helpers */}
-          {mockMode && (
-            <div className="mt-6 border-t border-slate-800/80 pt-5">
-              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-3">Acesso Rápido para Testes:</span>
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  onClick={() => handleQuickLogin('lucas@exemplo.com')}
-                  className="py-2 px-3 bg-slate-900 hover:bg-slate-850 rounded-lg text-left border border-slate-800 transition-colors"
-                >
-                  <span className="block text-xs font-semibold text-slate-200">Lucas (Cliente)</span>
-                  <span className="text-[9px] text-slate-500">Plano Premium</span>
-                </button>
-                <button
-                  onClick={() => handleQuickLogin('admin@strongfinance.com')}
-                  className="py-2 px-3 bg-slate-900 hover:bg-slate-850 rounded-lg text-left border border-slate-800 transition-colors"
-                >
-                  <span className="block text-xs font-semibold text-slate-200">Admin</span>
-                  <span className="text-[9px] text-slate-500">Enterprise</span>
-                </button>
-              </div>
-            </div>
-          )}
 
           {/* Bottom redirection Link */}
           <div className="mt-6 text-center">

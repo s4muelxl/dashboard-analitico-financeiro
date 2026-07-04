@@ -1,6 +1,6 @@
 import React from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Moon, Sun, Menu, Database, DatabaseZap } from 'lucide-react';
+import { Moon, Sun, Menu } from 'lucide-react';
 
 interface HeaderProps {
   activeTab: string;
@@ -46,27 +46,6 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, onMenuToggle }) => {
       {/* Toggles & Profile Controls */}
       <div className="flex items-center gap-3.5 md:gap-5">
         
-        {/* Mock Mode Control Switcher */}
-        <div className="flex items-center gap-2 rounded-xl bg-slate-100 dark:bg-slate-900 p-1.5 px-3 border border-slate-200/50 dark:border-slate-800">
-          <button
-            onClick={() => toggleMockMode(!mockMode)}
-            className="flex items-center gap-2 text-xs font-semibold focus:outline-none transition-colors"
-            title={mockMode ? 'Usando LocalStorage temporário. Clique para mudar para Banco Real Node/Express.' : 'Usando Banco Real Node/Express. Clique para mudar para Modo de Teste.'}
-          >
-            {mockMode ? (
-              <>
-                <DatabaseZap className="h-4 w-4 text-emerald-500 animate-pulse" />
-                <span className="hidden sm:inline text-emerald-600 dark:text-emerald-400">Modo Teste</span>
-                <span className="h-2 w-2 rounded-full bg-emerald-500 animate-ping absolute -mt-3.5 ml-16 hidden sm:block" />
-              </>
-            ) : (
-              <>
-                <Database className="h-4 w-4 text-blue-500" />
-                <span className="hidden sm:inline text-blue-600 dark:text-blue-400">Modo API Real</span>
-              </>
-            )}
-          </button>
-        </div>
 
         {/* Theme Toggler */}
         <button

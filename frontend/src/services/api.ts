@@ -1,10 +1,8 @@
 import { User, Transaction, Goal, Task } from '../types';
 
-// Detect or initialize Mock Mode setting (defaults to true for zero-setup preview)
+// Always use real API mode (Mock Mode disabled)
 const MOCK_STORAGE_KEY = 'sf_mock_mode';
-if (localStorage.getItem(MOCK_STORAGE_KEY) === null) {
-  localStorage.setItem(MOCK_STORAGE_KEY, 'true');
-}
+localStorage.setItem(MOCK_STORAGE_KEY, 'false');
 
 export const isMockMode = (): boolean => {
   return localStorage.getItem(MOCK_STORAGE_KEY) === 'true';
